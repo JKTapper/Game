@@ -4,9 +4,9 @@ import random
 
 class Game:
     
-    def __init__(self,cells,available_cells):
+    def __init__(self,cells,empty_cells):
         self.cells = cells
-        self.available_cells = available_cells
+        self.available_cells = empty_cells
 
     def __str__(self):
         rows = ['|'.join(['',*[self.cells[(x,y)] for x in range(0,width)],''])for y in range(height)]
@@ -16,32 +16,41 @@ class Game:
         self.cells[move] = player
         self.available_cells.remove(move)
 
-    def is_available(self,move):
-        return move in self.available_cells
+    def check_if_board_square_is_empty(self,move):
+        return move in self.empty_cells
 
-def print_game():
-    rows = ['|'.join(['',*[game.cells[(x,y)] for x in range(0,width)],''])for y in range(height)]
+    def validate_player_input_format(self,player_input):
+            valid = re.match('([0-9]+).+([0-9]+)',player_input)
+            coords = valid.group(1,2)
+            player_action = tuple([int(coord) for coord in coords])
+            return(player_action)
 
-    print(('\n ' + '-'*(2*width - 1) + ' \n').join(['',*rows,'']))
+    def generate_computer_move():
+        move = random.choice(list(empty_cells))
+        return move
+
+    def check_if_move_is_available(move):
+        if move not in cells.keys():
+            print('That is outside of the game board.')
+            return False
+        if move not in empty_cells:
+            print('That space is taken.')
+            return False
+        return True
+
+    def check_if_player_has_won(player):
+        horizontal = [[(x,y) for x in range(0,width)] for y in range(0,height)]
+        veritical = [[(x,y) for y in range(0,height)] for x in range(0,width)]
+        lines = horizontal + veritical
+        if width == height:
+            diagonal = [[(x,x) for x in range(width)],[(x,width - x - 1) for x in range(width)]]
+            lines += diagonal
+        player_won = any([all([cells[cell] == player for cell in line]) for line in lines])
+        return player_won
+        
 
 def player_prompt():
-    return 'Please enter the coordinates of where you want to play'
-
-def action(player_input):
-    valid = re.match('([0-9]+).+([0-9]+)',player_input)
-    coords = valid.group(1,2)
-    player_action = tuple([int(coord) for coord in coords])
-    return(player_action)
-
-def available(move):
-    if game.cells[move] != '.':
-        if player == human:
-            print('That space is taken')
-        return False
-    if move[0] not in range(0,height) or move[1] not in range(0,width):
-            print('That is outside of the game board')
-            return False
-    return True
+    return 'Please enter the coordinates of where you want to play X,Y, where X=0-n, Y=0-n'
 
 def reset():
     global game
@@ -55,29 +64,13 @@ def game_over():
         input('Play again?')
         reset()
 
-def player_won(player):
-    horizontal = [[(x,y) for x in range(0,width)] for y in range(0,height)]
-    veritical = [[(x,y) for y in range(0,height)] for x in range(0,width)]
-    lines = horizontal + veritical
-    if width == height:
-        diagonal = [[(x,x) for x in range(width)],[(x,width - x - 1) for x in range(width)]]
-        lines += diagonal
-    player_won = any([all([game.cells[cell] == player for cell in line]) for line in lines])
-    return player_won
-
 def end_game_value():
-    if player_won(player):
+    if check_if_player_has_won(player):
         return 1
     board_full = len(game.available_cells) == 0
     if board_full:
         return 0
     return -1
-
-def computer_move():
-    while True:
-        move = (random.randint(0,2),random.randint(0,2))
-        if move in game.available_cells:
-            return move
 
 def evaluate(move):
     pass
@@ -116,14 +109,14 @@ while True:
             reset()
             continue
         try:
-            move = action(player_input.strip())
+            move = validate_player_input_format(game,player_input.strip())
         except:
             print('Please enter a valid input')
             continue
     else:
         move = computer_move()
         print(f'The computer plays in position {move}.')
-    if not available(move):
+    if not check_if_move_is_available(move):
             continue
     game.do_move(move,player)
     turn +=1
