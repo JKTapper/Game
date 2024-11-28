@@ -1,5 +1,6 @@
 from ocupy_row import Game
 from Minmax import evaluate_game_position
+import time
 while True:
     turn = 0
     while True:
@@ -19,12 +20,15 @@ while True:
             if player_input == 'reset':
                 break
             if player_input == 'evaluate':
-                print(evaluate_game_position(game,0)) 
+                start_time = time.time()
+                print(evaluate_game_position(game,0),time.time() - start_time) 
                 break
             move = game.validate_player_input_format(player_input.strip())
         else:
             move = game.generate_computer_move()
             print(f'The computer plays in position {move}.')
+        if not game.check_if_move_is_available(move):
+            continue
         game.do_move(move)
         if game.check_if_player_has_won(game.active_player[1]):
             print(f'{game.active_player[1]} won!')
