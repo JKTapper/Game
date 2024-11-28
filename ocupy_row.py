@@ -5,7 +5,8 @@ class Game:
     
     setup_input = 'Begin game?'
     Help = 'Placeholder'
-    options = {'dimensions':(2,3),'players':[('human','X'),('random','O')],'number of players':2} #default options
+    players = [['human','X'],['human','O']]
+    options = {'dimensions':(3,3),'players':players,'number of players':len(players)} #default options
     advanced_options_explanation = 'Placeholder'
 
     @classmethod
@@ -14,19 +15,19 @@ class Game:
         number_of_human_players = int(input('Single player(1) or multiplayer(2)?'))
         players = ['player1','player2']
         if number_of_human_players == 1:
-            player_pieces = input('Do you want to play as X or O?')
-            player_turn = int(input('Do you want to play first(1) or second(2)?'))
-            players[player_turn - 1] = ('human','player_pieces')
-            pieces = ['X','O']
-            pieces.remove(player_pieces)
-            players[2 - player_turn] = ('random',pieces[0])
+            player_turn = input('Do you want to go first(type 0) or second(type 1)?')
+            players[player_turn][0] = 'human'
+            players[1-player_turn][0] = 'random'
         elif number_of_human_players == 2:
             players = [('human','X'),('human','O')]
         else:
             players = [('random','X'),('random','O')]
         dimensions = (size,size)
         Game.options = {'dimensions':dimensions,'players':players,'number of players':len(players)}
-            
+
+    @classmethod
+    def game_type_string(cls):
+            return 'ocupy_row' + ''.join([str(dimension) for dimension in Game.options['dimensions']]) + str(Game.options['number of players'])
 
     #def change_options_advanced(cls,advanced_options_string):
         
@@ -51,9 +52,10 @@ class Game:
             diagonal = [[(x,x) for x in range(self.width)],[(x,self.width - x - 1) for x in range(self.width)]]
             lines += diagonal
         self.winning_lines = lines
-        self.turn = 1
+        self.turn = 0
         self.active_player = Game.options['players'][self.turn]
-        self.next_player = Game.options['players'][~self.turn]
+        self.next_turn = 0
+        self.next_player = Game.options['players'][self.next_turn]
 
     def __str__(self):
         rows = ['|'.join(['',*[self.cells[(x,y)] for x in range(0,self.width)],''])for y in range(self.height)]
@@ -62,13 +64,52 @@ class Game:
     def compressed_string(self):
         rows = [''.join([self.cells[(x,y)] for x in range(0,self.width)])for y in range(self.height)]
         return ''.join(rows)
+
+    def flip_compressed_string_horizontal(self,string):
+        return ''.join([string[i*self.width:(i+1)*self.width][::-1] for i in range(self.height)])
+    
+
+    def flip_compressed_string_vertical(self,string):
+        return ''.join([string[i*self.width:(i+1)*self.width] for i in range(self.height)][::-1])
+    
+
+    def flip_compressed_string_diagonal(self,string):
+        return ''.join(string[i + j * self.width] for i in range(self.width) for j in range(self.width))
+
+    def return_symmetrical_compressed_strings(self,string):
+        strings = {string}
+        return strings
+        if self.width != self.height:
+            string = self.flip_compressed_string_horizontal(string)
+            strings.add(string)
+            string = self.flip_compressed_string_vertical(string)
+            strings.add(string)
+            string = self.flip_compressed_string_horizontal(string)
+            strings.add(string)
+            return strings
+        string = self.flip_compressed_string_diagonal(string)
+        strings.add(string)
+        string = self.flip_compressed_string_horizontal(string)
+        strings.add(string)
+        string = self.flip_compressed_string_diagonal(string)
+        strings.add(string)
+        string = self.flip_compressed_string_horizontal(string)
+        strings.add(string)
+        string = self.flip_compressed_string_diagonal(string)
+        strings.add(string)
+        string = self.flip_compressed_string_horizontal(string)
+        strings.add(string)
+        string = self.flip_compressed_string_diagonal(string)
+        strings.add(string)
+        return strings
     
     def do_move(self,move):
-        self.turn = ~self.turn
+        self.turn = self.next_turn
         self.active_player = self.next_player
         self.cells[move] = self.active_player[1]
         self.empty_cells.remove(move)
-        self.next_player = Game.options['players'][~self.turn]
+        self.next_turn = (self.turn + 1) % Game.options['number of players']
+        self.next_player = Game.options['players'][self.next_turn]
 
     def check_if_board_square_is_empty(self,move):
         return move in self.empty_cells
