@@ -10,7 +10,7 @@ while True:
         if setup_input == 'options':
             options = Game.change_options()
         if setup_input == 'advanced_options':
-            options = game.change_options()
+            options = Game.change_options()
         break
     game = Game()
     print(game)
