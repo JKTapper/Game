@@ -1,7 +1,19 @@
+"""
+This file defines the Game class for the other python scripts to use. The game
+defined here 'ocupy row' is a generalised noughts & crosses that can be played
+on a board with arbitrary dimensions and with an abritrary number of players.
+These values can be changed not just by editing the code but also by the user
+while the code is running using the inbuilt settings.
+"""
 import re
 import random
 
 class Game:
+    """
+    The class variables and methods handle the game setup parameters, which
+    the user can change in settings and also a couple other things that do
+    not depend on the specific state of the game.
+    """
     
     setup_input = 'Begin game?'
     Help = 'Placeholder'
