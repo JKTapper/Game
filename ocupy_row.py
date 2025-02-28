@@ -17,7 +17,7 @@ class Game:
     
     setup_input = 'Begin game?'
     Help = 'Placeholder'
-    players = [['human','X'],['human','O']]
+    players = [['human','X'],['random','O']]
     options = {'dimensions':(3,3),'players':players,'number of players':len(players)} #default options
     advanced_options_explanation = 'Placeholder'
 
@@ -30,9 +30,9 @@ class Game:
         """
         size = int(input('What size of board do you want to play on?'))
         number_of_human_players = int(input('Single player(1) or multiplayer(2)?'))
-        players = ['player1','player2']
+        players = [['player1','X'],['player2','O']]
         if number_of_human_players == 1:
-            player_turn = input('Do you want to go first(type 0) or second(type 1)?')
+            player_turn = int(input('Do you want to go first(type 0) or second(type 1)?'))
             players[player_turn][0] = 'human'
             players[1-player_turn][0] = 'random'
         elif number_of_human_players == 2:
@@ -49,7 +49,7 @@ class Game:
         fundamental parameters. It's used to name SQL tables of
         game positions.
         """
-            return 'ocupy_row' + ''.join([str(dimension) for dimension in Game.options['dimensions']]) + str(Game.options['number of players'])
+        return 'ocupy_row' + ''.join([str(dimension) for dimension in Game.options['dimensions']]) + str(Game.options['number of players'])
 
     #def change_options_advanced(cls,advanced_options_string):
         
@@ -79,7 +79,7 @@ class Game:
         self.winning_lines = lines
         self.turn = 0
         self.active_player = Game.options['players'][self.turn]
-        self.next_turn = 0
+        self.next_turn = 1
         self.next_player = Game.options['players'][self.next_turn]
 
     def __str__(self):
@@ -149,10 +149,10 @@ class Game:
         it does not take the player as an input, instead relying
         on the object variable active_player.
         """
-        self.turn = self.next_turn
-        self.active_player = self.next_player
         self.cells[move] = self.active_player[1]
         self.empty_cells.remove(move)
+        self.turn = self.next_turn
+        self.active_player = self.next_player
         self.next_turn = (self.turn + 1) % Game.options['number of players']
         self.next_player = Game.options['players'][self.next_turn]
 
@@ -204,7 +204,7 @@ class Game:
     def get_player_prompt(self):
         return 'Please enter the coordinates of where you want to play in the form x,y where x and y are the coordinates of where you want to play.'
 
-    def evaluate_end_game(self)
+    def evaluate_end_game(self):
         """
         This method defines the value any end game state
         has to each player. It is used by another script
