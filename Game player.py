@@ -1,3 +1,6 @@
+#This code manages the overall flow of the program and calls functions and objects from the other files.
+#It manages the creation and running of instantiations of games.
+#In general, if paired with a python file that is organised similarly to ocupy_row.py, it could allow a user to play and evaluate many different games. 
 from ocupy_row import Game
 from Minmax import evaluate_game_position
 import time

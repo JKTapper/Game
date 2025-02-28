@@ -1,8 +1,18 @@
+"""
+This code determines which, if either, player has a winning strategy
+from a given position in a game using the minimax algorithmn. It is
+written to be able to interface with any game that's code is
+structured similarly to ocupy_row.py.
+"""
 import copy
 import ocupy_row
 import mysql.connector
 
 def check_for_listed_value(position):
+    """
+    This function is called to check if the position being evaluated
+    already has a known value stored in the associated database.
+    """
     game_position_values = mysql.connector.connect(user='root',
                                 password='password@2024',
                                 database='gamepositionvalues')
@@ -18,6 +28,10 @@ def check_for_listed_value(position):
     return(False,False)
 
 def save_value(game,position,value):
+    """
+    This function is called once a position has been evaluated
+    to store the position's value in the relevant database.
+    """
     values = ','.join([str(value[player]) for player in players])
     #positions = list(game.return_symmetrical_compressed_strings(position))
     positions = [position]
@@ -32,6 +46,12 @@ def save_value(game,position,value):
     game_position_values.commit()
 
 def evaluate_game_position(game,depth):
+    """
+    The functions initiates the evaluation process before handing off
+    to the recursive function. In particular, it creates a MySQL
+    database to store evaluated positions for the game in question if
+    one does not already exist.
+    """
     global name
     name = game.game_type_string()
     players_INT = ', '.join([player[1] + ' INT' for player in game.options['players']])
@@ -51,6 +71,16 @@ def evaluate_game_position(game,depth):
     return evaluate_game_position_recursion(game,depth)
 
 def evaluate_game_position_recursion(game,depth):
+    """
+    This functions implements the minimax game solving
+    algorithmn recursively. Given a game position, it first
+    checks if the position already has a stored value in the
+    database. Then, it checks if the position is an endgame.
+    If neither condiiton holds then it evaluates all the
+    possible future game states and then evaluates the given
+    position by assuming the active player makes the best
+    move available to them.
+    """
     depth += 1
     print('loading')
     position = game.compressed_string() 
